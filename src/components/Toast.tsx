@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { NavLink } from 'react-router-dom'
 import type { Toast } from '../store'
 
 export function Toasts({ toasts }: { toasts: Toast }) {
@@ -26,6 +27,17 @@ export function TopBar({
         <span className="brand-dot" />
         SugarSprint
       </div>
+      <nav className="hdr-nav" aria-label="Sections">
+        <NavLink to="/app" className={({ isActive }) => (isActive ? 'on' : '')}>
+          Home
+        </NavLink>
+        <NavLink to="/care" className={({ isActive }) => (isActive ? 'on' : '')}>
+          Caregiver
+        </NavLink>
+        <NavLink to="/report" className={({ isActive }) => (isActive ? 'on' : '')}>
+          Report
+        </NavLink>
+      </nav>
       <div className="row" style={{ gap: 8 }}>
         {name && <div className="avatar">{initials}</div>}
         {onSettings && (

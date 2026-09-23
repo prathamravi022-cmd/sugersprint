@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { themeFor } from '../constants'
 import { currentStreak, useStore } from '../store'
 import { Screen, TopBar } from '../components/Toast'
+import { ViewToggle } from '../components/ViewToggle'
+import { SiteFooter } from '../components/SiteFooter'
 import { CHEER_EMOJIS } from '../constants'
 import { todayISO } from '../types'
 
@@ -31,9 +33,12 @@ export function Caregiver() {
     <div className="care-shell">
       <TopBar />
       <Screen>
-        <div className="center" style={{ gap: 6 }}>
-          <h1 className="h1">Family Corner 💛</h1>
-          <p className="sub">Positive vibes only — because support beats nagging.</p>
+        <div className="row-between">
+          <div className="stack" style={{ gap: 4 }}>
+            <h1 className="h1">Family Corner 💛</h1>
+            <p className="sub">Positive vibes only — because support beats nagging.</p>
+          </div>
+          <ViewToggle />
         </div>
 
         {/* Status banner — the only thing that matters here */}
@@ -101,6 +106,7 @@ export function Caregiver() {
           instead — it's kinder and more useful.
         </p>
       </Screen>
+      <SiteFooter />
     </div>
   )
 }

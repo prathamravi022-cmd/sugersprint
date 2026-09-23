@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { SPRINT_THEMES } from '../constants'
 import { useStore } from '../store'
 import { PhoneShell, Screen, TopBar } from '../components/Toast'
@@ -31,6 +32,9 @@ export function Onboarding() {
     <PhoneShell>
       <Screen>
         <TopBar />
+        <Link to="/" className="btn-link" style={{ alignSelf: 'flex-start' }}>
+          ← Back to home
+        </Link>
         <div className="steps">
           {[0, 1, 2, 3, 4].map((i) => (
             <div key={i} className={`step-dot${i <= progress ? ' on' : ''}`} />

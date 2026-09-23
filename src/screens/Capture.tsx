@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { themeFor } from '../constants'
 import { useStore } from '../store'
 import { PhoneShell, Screen, TopBar } from '../components/Toast'
-import { CameraOverlay } from '../components/CameraOverlay'
 import { VoiceRecorder } from '../components/VoiceRecorder'
 import { runOcr } from '../api'
 import type { SprintType } from '../types'
@@ -25,7 +24,7 @@ export function Capture() {
           <TopBar />
           <div className="card stack">
             <p className="sub">No active sprint — start one first.</p>
-            <button className="btn btn-yellow" onClick={() => nav('/')}>
+            <button className="btn btn-yellow" onClick={() => nav('/app')}>
               Go home
             </button>
           </div>
@@ -57,32 +56,78 @@ function GlucoseFlow() {
   const [stage, setStage] = useState<'camera' | 'confirm' | 'manual'>('camera')
   const [ocr, setOcr] = useState<{ value: number; confidence: number } | null>(null)
   const [manual, setManual] = useState('')
+  const [processing, setProcessing] = useState(false)
+  const [shot, setShot] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement | null>(null)
+
+  const runAi = async (preview: string | null) => {
+    setProcessing(true)
+    setShot(preview)
+    const res = await runOcr()
+    setProcessing(false)
+    if (res.value == null) {
+      setStage('manual')
+      return
+    }
+    setOcr({ value: res.value, confidence: res.confidence })
+    setStage('confirm')
+  }
 
   const confirmed = async (value: number) => {
     await completeToday({ value })
     triggerConfetti()
     pushToast('🩸 Glucose logged — sprint complete!')
-    nav('/')
+    nav('/app')
+  }
+
+  const onUpload = (file: File | undefined) => {
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => void runAi(String(reader.result))
+    reader.readAsDataURL(file)
   }
 
   if (stage === 'camera') {
     return (
       <div className="stack" style={{ gap: 16 }}>
         <h2 className="h2">Snap your glucometer</h2>
-        <CameraOverlay
-          onCaptured={async () => {
-            const res = await runOcr()
-            if (res.value == null) {
-              setStage('manual')
-              return
-            }
-            setOcr({ value: res.value, confidence: res.confidence })
-            setStage('confirm')
-          }}
+        <div className="camera-view">
+          {shot && <img className="preview" src={shot} alt="Captured glucometer" />}
+          <div className="lcd-hint">Position the LCD inside the golden frame</div>
+          <div className="camera-frame">
+            <div className="gold-frame" />
+          </div>
+          <div className="scanline" />
+          <div className="hold-steady">Hold Steady</div>
+          <button
+            className="ocr-shutter"
+            aria-label="Capture photo"
+            disabled={processing}
+            onClick={() => void runAi(null)}
+          />
+          {processing && (
+            <div className="ocr-processing">
+              <span className="spin" style={{ fontSize: '1.4rem' }}>◌</span>
+              AI is reading your glucometer…
+            </div>
+          )}
+        </div>
+        <div className="row" style={{ gap: 10 }}>
+          <button className="btn btn-ghost" onClick={() => fileRef.current?.click()}>
+            📷 Upload photo
+          </button>
+          <button className="btn btn-ghost" onClick={() => setStage('manual')}>
+            ⌨️ Type manually
+          </button>
+        </div>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          style={{ display: 'none' }}
+          onChange={(e) => onUpload(e.target.files?.[0])}
         />
-        <button className="btn btn-ghost" onClick={() => setStage('manual')}>
-          ⌨️ Type manually instead
-        </button>
       </div>
     )
   }
@@ -91,6 +136,11 @@ function GlucoseFlow() {
     return (
       <div className="stack" style={{ gap: 16 }}>
         <h2 className="h2">Confirm reading</h2>
+        {shot && (
+          <div className="camera-view" style={{ aspectRatio: '16 / 7' }}>
+            <img className="preview" src={shot} alt="Uploaded glucometer" />
+          </div>
+        )}
         <div className="readout">
           <span className="value">{ocr.value}</span>
           <span className="unit">mg/dL</span>
@@ -139,6 +189,7 @@ function GlucoseFlow() {
     </div>
   )
 }
+
 
 function Numpad({
   onDigit,
@@ -199,7 +250,7 @@ function WalkFlow() {
     await completeToday({ value: Math.max(1, Math.round(elapsed / 60)) })
     triggerConfetti()
     pushToast('🚶 Walk logged — sprint complete!')
-    nav('/')
+    nav('/app')
   }
 
   return (
@@ -229,7 +280,7 @@ function WalkFlow() {
           ✓ Done — 10 minutes
         </button>
       )}
-      <button className="btn-link" onClick={() => nav('/')}>
+      <button className="btn-link" onClick={() => nav('/app')}>
         Cancel
       </button>
     </div>
@@ -253,7 +304,7 @@ function MedFlow({ sprintType }: { sprintType: SprintType }) {
     await completeToday({ media: photo ?? undefined, transcription: note ?? undefined })
     triggerConfetti()
     pushToast('💊 Medication marked — sprint complete!')
-    nav('/')
+    nav('/app')
   }
 
   return (
