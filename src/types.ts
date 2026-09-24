@@ -25,6 +25,8 @@ export interface DailyLog {
   media_url: string | null // optional photo/audio (ephemeral per security spec)
   transcription: string | null // optional Whisper transcription
   created_at: string
+  tag?: 'fasting' | 'postmeal' // glucose context
+  note?: string // free-text med dose note
 }
 
 export type CheerEmoji = '👏' | '❤️' | '🔥'
@@ -36,6 +38,7 @@ export interface Cheer {
   caregiver_name: string
   emoji_type: CheerEmoji
   created_at: string
+  message?: string // optional custom encouragement
 }
 
 export interface OcrResult {

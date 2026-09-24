@@ -26,16 +26,23 @@ npm run build    # typecheck + production build
 1. **Onboarding** — any phone number → the OTP is shown on screen (demo) → name →
    generate a caregiver invite link → pick a sprint (try *Log Fasting Sugar*).
 2. **Dashboard** — animated golden StreakRing, one TaskCard, empty cheers row.
-3. **Tap the TaskCard** — camera scan animation → OCR confirm (editable) → Save.
-   Confetti + haptic toast + the task flips to gold *Sprint Complete*.
+3. **Tap the TaskCard** — the **real device camera** opens in the golden viewfinder
+   (flip / torch controls) → shutter grabs an actual frame → OCR confirm (editable)
+   → Save. Confetti + haptic toast + the task flips to gold *Sprint Complete*.
+   No camera or permission blocked? A plain-language banner appears with working
+   *Upload photo* and *Type manually* alternatives — never a dead button.
 4. **~0.5s later** — caregiver bot sends a cheer (❤️ Meera) into *Recent Cheers*.
 5. **`/#/care`** — caregiver dashboard: status banner, 3-tap cheer grid, RBAC note.
    A sent cheer triggers confetti on the patient screen.
 6. **`/#/report`** — generate the 30-day doctor summary: stats, glucose chart,
    calendar, AI insights → *Save as PDF* uses the browser print dialog.
 7. **Walk / Med sprints** — re-run onboarding (clear site data) and pick another
-   sprint: 10-minute countdown timer, or one-tap *Mark as Taken* with optional
-   photo + long-press voice note (waveform → mock Whisper transcript).
+   sprint: countdown timer that holds a screen wake lock, or one-tap *Mark as Taken*
+   with an optional real camera photo and a genuinely recorded voice note
+   (`MediaRecorder` + `SpeechRecognition`, with a typed-note fallback).
+8. **`/#/insights`** — time in range, estimated A1c, coefficient of variation,
+   weekly trends, risk flags and auto-generated questions for your doctor.
+9. **Ctrl/⌘ + K** anywhere — command palette for every page and app action.
 
 Offline resilience: **Simulate offline** on the dashboard → completes stay optimistic
 in localStorage and queue up → going back online flushes the queue with a toast.
@@ -49,8 +56,18 @@ src/
 ├── constants.ts        # Sprint themes (PRD §4)
 ├── types.ts            # Types = Supabase schema columns
 ├── styles.css          # Design system (tokens per Frontend Spec §2–3)
-├── components/         # StreakRing · TaskCard · CameraOverlay · VoiceRecorder · Confetti · CheersRow
-└── screens/            # Onboarding · Dashboard · Capture · Caregiver · Report
+├── lib/
+│   ├── camera.ts       # useCamera() — real getUserMedia state machine + capture
+│   ├── analytics.ts    # Time-in-range, A1c estimate, adherence, risk flags, insights
+│   ├── notify.ts       # Local notifications (permission-aware, best-effort)
+│   ├── wakelock.ts     # Screen wake lock for the walk timer
+│   ├── badges.ts       # Badge catalog + unlock evaluation
+│   ├── content.ts      # Daily tips, facts, quotes
+│   └── format.ts       # Dates, glucose units, haptics, audio blips
+├── components/         # CameraView · Art · SectionBand · CommandPalette · VoiceRecorder ·
+│                       # StreakRing · TaskCard · Confetti · CheersRow · ScrollBits · ErrorBoundary
+└── screens/            # Onboarding · Dashboard · Capture · Insights · Caregiver ·
+                        # Report · Settings · Achievements · NotFound
 
 supabase/migrations/001_init.sql   # Schema + RLS + ephemeral media bucket
 ```
@@ -77,3 +94,10 @@ endpoints (`POST /api/v1/sprints/`, `/logs/`, `/cheers/`, `/logs/upload`,
   must delete the object right after AI extraction.
 - **Rate limiting / presigned report URLs / DPDP consent**: backend concerns —
   documented in the migration comments and `README` swap guide.
+
+### Artwork is bundled, not fetched
+
+Every illustration in the app is an inline SVG in `src/components/Art.tsx`, so no
+section can render blank when the network is slow or a CDN is blocked. Remote
+photography is layered *on top* of that artwork by `SectionBand`, and simply
+removes itself if it fails to load. `FEATURES.md` lists all 220 numbered features.

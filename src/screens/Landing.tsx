@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Avatar, Photo, unsplash } from '../components/Photo'
 import { SiteFooter } from '../components/SiteFooter'
@@ -216,22 +216,46 @@ export function Landing() {
         </div>
       </section>
 
+      {/* ---------- Emoji ticker ---------- */}
+      <div className="ticker" aria-hidden>
+        <div className="ticker-inner">
+          {[0, 1].map((k) => (
+            <span key={k}>
+              🔥 Streaks · 👏 Caregiver Cheers · 🩸 OCR Glucose · ⏱️ Walk Timer · 💊 Meds · 🎙️
+              Voice Notes · 📄 Doctor PDF · 🛡️ Streak Shield · 🏅 Badges · ⚡ XP Levels · 📡
+              Offline Mode · 🔐 Report PIN ·&nbsp;
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* ---------- Stats ---------- */}
       <section className="stats-strip">
         <div className="stat-block">
-          <div className="v">2 min</div>
+          <div className="v">
+            <CountUp to={2} />
+            {' min'}
+          </div>
           <div className="k">Daily effort</div>
         </div>
         <div className="stat-block">
-          <div className="v">30 days</div>
+          <div className="v">
+            <CountUp to={30} />
+            {' days'}
+          </div>
           <div className="k">To a real habit</div>
         </div>
         <div className="stat-block">
-          <div className="v">0</div>
+          <div className="v">
+            <CountUp to={0} />
+          </div>
           <div className="k">Guilt streak resets</div>
         </div>
         <div className="stat-block">
-          <div className="v">1 tap</div>
+          <div className="v">
+            <CountUp to={1} />
+            {' tap'}
+          </div>
           <div className="k">Cheer from family</div>
         </div>
       </section>
@@ -274,6 +298,110 @@ export function Landing() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ---------- Security band ---------- */}
+      <section className="section" id="security-band" style={{ paddingTop: 0 }}>
+        <div className="band">
+          <div className="band-media">
+            <Photo
+              src={unsplash('photo-1614064641938-3bbee52942c7', 900)}
+              alt="Your data, locked down"
+              emoji="🔒"
+            />
+          </div>
+          <div className="stack" style={{ gap: 14 }}>
+            <span className="eyebrow">Security first</span>
+            <h2 className="landing-h2">Health data deserves hospital-grade care.</h2>
+            <ul className="checklist">
+              <li>🔐 TLS 1.3 in transit · AES-256 at rest</li>
+              <li>🖼️ Photos &amp; voice notes purged right after AI extraction</li>
+              <li>🛡️ Role-based access — caregivers never see raw numbers</li>
+              <li>📊 5/day rate limits on expensive AI endpoints</li>
+              <li>🗑️ One-tap “Delete My Account &amp; Data” (DPDP Act 2023)</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- Doctor band ---------- */}
+      <section className="section" style={{ paddingTop: 0 }}>
+        <div className="band invert">
+          <div className="stack" style={{ gap: 14 }}>
+            <span className="eyebrow">The doctor loop</span>
+            <h2 className="landing-h2">Fifteen-minute visits, finally with evidence.</h2>
+            <p className="sub">
+              Day 30 compiles adherence, glucose trends and AI-summarised voice-note context
+              into one printable page — shared via a time-bound, PIN-protected link.
+            </p>
+            <div className="report-preview stack" style={{ gap: 8 }}>
+              <div className="rp-row">
+                <span className="muted">Days completed</span>
+                <span className="numeric gold-text">24 / 30</span>
+              </div>
+              <div className="rp-row">
+                <span className="muted">Avg fasting glucose</span>
+                <span className="numeric gold-text">118 mg/dL</span>
+              </div>
+              <div className="rp-row">
+                <span className="muted">AI voice insight</span>
+                <span className="small">“Late doses after heavy dinners”</span>
+              </div>
+            </div>
+            <Link to="/report" className="btn btn-gold" style={{ width: 'auto' }}>
+              Preview the report →
+            </Link>
+          </div>
+          <div className="band-media">
+            <Photo
+              src={unsplash('photo-1576091160550-2173dba999ef', 900)}
+              alt="Clinical conversations, backed by real data"
+              emoji="🩺"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- Before / After ---------- */}
+      <section className="section" style={{ paddingTop: 0 }}>
+        <div className="section-head center">
+          <span className="eyebrow">Before &amp; after</span>
+          <h2 className="landing-h2">From nagging to cheering.</h2>
+        </div>
+        <div className="beforeafter">
+          <div className="ba-card before">
+            <div className="ba-media">
+              <Photo
+                src={unsplash('photo-1499750310107-5fef28a66643', 800)}
+                alt="Data overload and guilt"
+                emoji="😩"
+              />
+            </div>
+            <span className="ba-tag">Traditional apps</span>
+            <ul>
+              <li>❌ “Did you take your meds?” — 4× a day</li>
+              <li>❌ 20-field logs after every meal</li>
+              <li>❌ Streak reset to zero, guilt trip included</li>
+              <li>❌ Wearable required before day one</li>
+            </ul>
+          </div>
+          <div className="ba-card after">
+            <div className="ba-media">
+              <Photo
+                src={unsplash('photo-1511895426328-dc8714191300', 800)}
+                alt="Family cheering together"
+                emoji="🥳"
+              />
+            </div>
+            <span className="ba-tag gold">SugarSprint</span>
+            <ul>
+              <li>✅ One 2-minute task, one golden ring</li>
+              <li>✅ Family sends 👏❤️🔥 — never nagging</li>
+              <li>✅ Missed a day? Shield it, keep the history</li>
+              <li>✅ Camera + voice — no gadgets needed</li>
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -374,6 +502,26 @@ export function Landing() {
         </div>
       </section>
 
+      {/* ---------- Newsletter + store badges ---------- */}
+      <section className="section" style={{ paddingTop: 0 }}>
+        <div className="newsletter">
+          <div className="stack" style={{ gap: 6, flex: 1, minWidth: 260 }}>
+            <h3 className="landing-h2" style={{ fontSize: '1.3rem' }}>
+              Sprint notes, once a month
+            </h3>
+            <p className="sub">
+              Habit science, product updates and gentle streak-saving tips. No spam, ever.
+            </p>
+          </div>
+          <NewsletterForm />
+        </div>
+        <div className="row" style={{ justifyContent: 'center', gap: 12, marginTop: 22 }}>
+          <span className="badge">📱 App Store — coming soon</span>
+          <span className="badge">🤖 Google Play — coming soon</span>
+          <span className="badge">🌐 Works today as a PWA</span>
+        </div>
+      </section>
+
       <SiteFooter />
     </div>
   )
@@ -418,5 +566,82 @@ function MiniRing() {
         of 30
       </text>
     </svg>
+  )
+}
+
+/* Count-up animation when the stat scrolls into view */
+function CountUp({ to, duration = 900 }: { to: number; duration?: number }) {
+  const ref = useRef<HTMLSpanElement | null>(null)
+  const [val, setVal] = useState(to === 0 ? 0 : 0)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    let raf = 0
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        io.disconnect()
+        const start = performance.now()
+        const tick = (now: number) => {
+          const p = Math.min(1, (now - start) / duration)
+          const eased = 1 - Math.pow(1 - p, 3)
+          setVal(Math.round(to * eased))
+          if (p < 1) raf = requestAnimationFrame(tick)
+        }
+        raf = requestAnimationFrame(tick)
+      },
+      { threshold: 0.4 },
+    )
+    io.observe(el)
+    return () => {
+      io.disconnect()
+      cancelAnimationFrame(raf)
+    }
+  }, [to, duration])
+
+  return (
+    <span ref={ref} className="numeric">
+      {val}
+    </span>
+  )
+}
+
+/* Mock newsletter capture with local success state */
+function NewsletterForm() {
+  const [email, setEmail] = useState('')
+  const [done, setDone] = useState(false)
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+
+  if (done) {
+    return (
+      <span className="badge gold" style={{ alignSelf: 'center' }}>
+        ✅ You’re on the list — see you next sprint!
+      </span>
+    )
+  }
+
+  return (
+    <form
+      className="row"
+      style={{ gap: 10, flex: 1, minWidth: 260 }}
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (valid) setDone(true)
+      }}
+    >
+      <input
+        className="input"
+        type="email"
+        required
+        placeholder="you@example.com"
+        aria-label="Email address"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <button className="btn btn-yellow" type="submit" disabled={!valid} style={{ width: 'auto', padding: '14px 20px' }}>
+        Subscribe
+      </button>
+    </form>
   )
 }

@@ -1,10 +1,19 @@
 import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
-import type { Toast } from '../store'
+import type { ToastItem } from '../store'
 
-export function Toasts({ toasts }: { toasts: Toast }) {
-  if (!toasts) return null
-  return <div className="toast">{toasts.text}</div>
+/** Stacked toast queue (max 3 visible). */
+export function Toasts({ toasts }: { toasts: ToastItem[] }) {
+  if (toasts.length === 0) return null
+  return (
+    <div className="toast-stack" role="status" aria-live="polite">
+      {toasts.map((t) => (
+        <div className="toast" key={t.id}>
+          {t.text}
+        </div>
+      ))}
+    </div>
+  )
 }
 
 export function TopBar({

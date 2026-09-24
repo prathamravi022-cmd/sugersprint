@@ -3,7 +3,10 @@ import { Link } from 'react-router-dom'
 import { SPRINT_THEMES } from '../constants'
 import { useStore } from '../store'
 import { PhoneShell, Screen, TopBar } from '../components/Toast'
+import { Photo, unsplash } from '../components/Photo'
 import type { SprintType } from '../types'
+
+const AVATARS = ['🧑', '👨', '👩', '👵', '👴', '🦸', '🐱', '🐶', '🌻', '⚡']
 
 /**
  * Onboarding — PRD §4A:
@@ -18,6 +21,9 @@ export function Onboarding() {
   const [link, setLink] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [consent, setConsent] = useState(false)
+  const avatar = useStore((s) => s.profile.avatar)
+  const setAvatar = useStore((s) => s.setAvatar)
 
   const requestOtp = useStore((s) => s.requestOtp)
   const confirmOtp = useStore((s) => s.confirmOtp)
@@ -64,9 +70,24 @@ export function Onboarding() {
                   onChange={(e) => setPhone(e.target.value)}
                 />
               </div>
+              <label
+                className="row"
+                style={{ gap: 10, cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text-dim)' }}
+              >
+                <input
+                  type="checkbox"
+                  checked={consent}
+                  onChange={(e) => setConsent(e.target.checked)}
+                  style={{ width: 18, height: 18, accentColor: '#FACC15' }}
+                />
+                <span>
+                  I consent to processing of my health logs under the DPDP Act 2023 — explicit
+                  consent, data minimisation, delete anytime.
+                </span>
+              </label>
               <button
                 className="btn btn-yellow"
-                disabled={phone.replace(/\D/g, '').length < 10 || busy}
+                disabled={phone.replace(/\D/g, '').length < 10 || !consent || busy}
                 onClick={async () => {
                   setBusy(true)
                   await requestOtp(phone)
@@ -75,6 +96,19 @@ export function Onboarding() {
                 }}
               >
                 Send OTP
+              </button>
+              <button
+                className="btn btn-ghost"
+                disabled={busy}
+                onClick={async () => {
+                  setBusy(true)
+                  useStore.setState((s) => ({ profile: { ...s.profile, consent: true } }))
+                  await saveProfile('Rahul')
+                  await startSprint('glucose')
+                  setBusy(false)
+                }}
+              >
+                🎮 Explore the demo (skip signup)
               </button>
               <p className="small muted">
                 Phone OTP keeps sign-in frictionless for less tech-savvy family members.
@@ -128,6 +162,25 @@ export function Onboarding() {
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
+            <div className="field">
+              <label>Choose your avatar</label>
+              <div className="row" style={{ flexWrap: 'wrap', gap: 8 }}>
+                {AVATARS.map((a) => (
+                  <button
+                    key={a}
+                    className="icon-btn"
+                    style={{
+                      fontSize: '1.3rem',
+                      borderColor: avatar === a ? 'var(--yellow)' : undefined,
+                    }}
+                    onClick={() => setAvatar(a)}
+                    aria-label={`Avatar ${a}`}
+                  >
+                    {a}
+                  </button>
+                ))}
+              </div>
+            </div>
             <button
               className="btn btn-yellow"
               disabled={name.trim().length < 2 || busy}
@@ -145,6 +198,21 @@ export function Onboarding() {
 
         {step === 'invite' && (
           <div className="card stack" style={{ marginTop: 12 }}>
+            <div
+              style={{
+                position: 'relative',
+                height: 130,
+                borderRadius: 14,
+                overflow: 'hidden',
+                border: '1px solid var(--border)',
+              }}
+            >
+              <Photo
+                src={unsplash('photo-1511895426328-dc8714191300', 800)}
+                alt="Family together — caregiving made lighter"
+                emoji="👨‍👩‍👧"
+              />
+            </div>
             <span className="section-title">Invite a caregiver</span>
             <p className="sub">
               A spouse or child gets a magic link on WhatsApp/SMS. They cheer you on — they never
@@ -157,7 +225,7 @@ export function Onboarding() {
                     {link}
                   </span>
                 </div>
-                <div className="row">
+                <div className="row" style={{ flexWrap: 'wrap', gap: 8 }}>
                   <button
                     className="btn btn-ghost"
                     onClick={() => {
@@ -165,12 +233,26 @@ export function Onboarding() {
                       pushToast('🔗 Link copied')
                     }}
                   >
-                    Copy
+                    📋 Copy
                   </button>
-                  <button className="btn btn-ghost" onClick={() => setStep('sprint')}>
-                    Skip for now
-                  </button>
+                  <a
+                    className="btn btn-ghost"
+                    href={`https://wa.me/?text=${encodeURIComponent(`Join my SugarSprint as my caregiver 💛 ${link}`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    💬 WhatsApp
+                  </a>
+                  <a
+                    className="btn btn-ghost"
+                    href={`sms:?&body=${encodeURIComponent(`SugarSprint caregiver invite: ${link}`)}`}
+                  >
+                    ✉️ SMS
+                  </a>
                 </div>
+                <button className="btn btn-ghost" onClick={() => setStep('sprint')}>
+                  Continue →
+                </button>
               </div>
             ) : (
               <button
@@ -196,6 +278,21 @@ export function Onboarding() {
             <div className="center" style={{ marginTop: 16 }}>
               <h1 className="h1">Pick your sprint</h1>
               <p className="sub">One goal. Thirty days. You've got this, {name || 'champion'}.</p>
+            </div>
+            <div
+              style={{
+                position: 'relative',
+                height: 120,
+                borderRadius: 14,
+                overflow: 'hidden',
+                border: '1px solid var(--border)',
+              }}
+            >
+              <Photo
+                src={unsplash('photo-1585937421612-70a008356fbe', 800)}
+                alt="A healthy thali — care that fits real life"
+                emoji="🍛"
+              />
             </div>
             <div className="stack">
               {SPRINT_THEMES.map((t) => (
